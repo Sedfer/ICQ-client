@@ -13,10 +13,10 @@ MainWindow::MainWindow(QWidget *parent)
     hLayoutMain->addLayout(vLayoutLeft, 5);
     hLayoutMain->addLayout(vLayoutRight, 2);
 
-    // Left layout (chatWindow, textEdit, buttonSend)
-    chatWindow = new QTextEdit();
-    chatWindow->setReadOnly(true);
-    vLayoutLeft->addWidget(chatWindow, 5);
+    // Left layout (tabWindow, textEdit, buttonSend)
+    listTabs = new QList<QTextEdit*>();
+    tabWidget = new QTabWidget();
+    vLayoutLeft->addWidget(tabWidget, 5);
     // Bottom layout (textEdit, buttonSend)
     hLayoutBottom = new QHBoxLayout();
     textEdit = new QPlainTextEdit();
@@ -55,19 +55,33 @@ MainWindow::~MainWindow()
 
 }
 
+void MainWindow::addTab(QTextEdit *chatWindow, const QString &name)
+{
+    chatWindow->setReadOnly(true);
+    listTabs->append(chatWindow);
+    tabWidget->addTab(chatWindow, name);
+}
+
 void MainWindow::sendMessage()
 {
     QString text = textEdit->toPlainText();
     if(!text.compare("")) // Empty message
         return;
 
+    int index = tabWidget->currentIndex();
+    if(index == -1){
+        errorNoActiveTab();
+        return;
+    }
+
     QTime time = QTime::currentTime();
     QString color = "\"brown\"";
     QString name = "Someone";
-    QString sendedString = "<font color=" + color + ">" + name +
-            " [" + time.toString() + "] " + "</font>" + "<br>" +
-            text + "<br>";
-    chatWindow->append(sendedString);
+    QString nameAndTime = "<font color=" + color + ">" + name +
+            " [" + time.toString() + "] " + "</font>";
+
+    listTabs->at(index)->append(nameAndTime);
+    listTabs->at(index)->append(text + "\n");
     textEdit->clear();
 }
 
@@ -83,10 +97,23 @@ void MainWindow::removeUser()
 
 void MainWindow::leaveRoom()
 {
-    cout << "Leave room" << endl;
+    int index = tabWidget->currentIndex();
+    if(index == -1){
+        errorNoActiveTab();
+        return;
+    }
+
+    tabWidget->removeTab(index);
+    delete listTabs->at(index);
+    listTabs->removeAt(index);
 }
 
 void MainWindow::createRoom()
 {
-    cout << "Create room" << endl;
+    addTab(new QTextEdit());
+}
+
+void MainWindow::errorNoActiveTab()
+{
+    cerr << "Error: no active tab" << endl;
 }

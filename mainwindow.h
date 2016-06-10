@@ -9,9 +9,10 @@ private:
     // Main layout
     QHBoxLayout *hLayoutMain;
 
-    // Left layout (chatWindow, bottom layout)
+    // Left layout (tabWindows, bottom layout)
     QVBoxLayout *vLayoutLeft;
-    QTextEdit *chatWindow;
+    QTabWidget *tabWidget;
+    QList<QTextEdit*> *listTabs;
     // Bottom layout (textEdit, buttonSend)
     QHBoxLayout *hLayoutBottom;
     QPlainTextEdit *textEdit;
@@ -32,8 +33,13 @@ private slots:
     void leaveRoom();
     void createRoom();
 
+private:
+    void errorNoActiveTab();
+
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    void addTab(QTextEdit *chatWindow, const QString &name = "Tab");
 };
 
