@@ -1,4 +1,7 @@
 #include "mainwindow.h"
+#include <iostream>
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -36,9 +39,54 @@ MainWindow::MainWindow(QWidget *parent)
     vLayoutRight->addWidget(buttonNew, 1);
 
     this->setLayout(hLayoutMain);
+
+    buttonSend->setDefault(true);
+
+    // Connections
+    connect(buttonSend, SIGNAL(clicked()), SLOT(sendMessage()));
+    connect(buttonAdd, SIGNAL(clicked()), SLOT(addUser()));
+    connect(buttonRemove, SIGNAL(clicked()), SLOT(removeUser()));
+    connect(buttonLeave, SIGNAL(clicked()), SLOT(leaveRoom()));
+    connect(buttonNew, SIGNAL(clicked()), SLOT(createRoom()));
 }
 
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::sendMessage()
+{
+    QString text = textEdit->toPlainText();
+    if(!text.compare("")) // Empty message
+        return;
+
+    QTime time = QTime::currentTime();
+    QString color = "\"brown\"";
+    QString name = "Someone";
+    QString sendedString = "<font color=" + color + ">" + name +
+            " [" + time.toString() + "] " + "</font>" + "<br>" +
+            text + "<br>";
+    chatWindow->append(sendedString);
+    textEdit->clear();
+}
+
+void MainWindow::addUser()
+{
+    cout << "Add user" << endl;
+}
+
+void MainWindow::removeUser()
+{
+    cout << "Remove user" << endl;
+}
+
+void MainWindow::leaveRoom()
+{
+    cout << "Leave room" << endl;
+}
+
+void MainWindow::createRoom()
+{
+    cout << "Create room" << endl;
 }

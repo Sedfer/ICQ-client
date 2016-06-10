@@ -25,6 +25,12 @@ private:
     QPushButton *buttonLeave;
     QPushButton *buttonNew;
 
+private slots:
+    void sendMessage();
+    void addUser();
+    void removeUser();
+    void leaveRoom();
+    void createRoom();
 
 public:
     MainWindow(QWidget *parent = 0);
