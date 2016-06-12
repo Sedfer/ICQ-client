@@ -31,7 +31,7 @@ private:
     QPushButton *buttonLeave;
     QPushButton *buttonCreate;
 
-private slots:
+public slots:
     void readyRead();
     void disconnected();
 
@@ -41,8 +41,8 @@ private slots:
     void dialogJoinRoom();
     void dialogCreateRoom();
 
-    void registerUser();
-    void login();
+    void registerUser(const QString &name, const QString &password);
+    void login(const QString &name, const QString &password);
     void logoff();
     void createRoom(const QString &name);
     void leaveRoom();

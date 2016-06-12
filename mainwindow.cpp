@@ -117,19 +117,24 @@ void MainWindow::dialogCreateRoom()
     dialog->show();
 }
 
-void MainWindow::registerUser()
+void MainWindow::registerUser(const QString &name, const QString &password)
 {
-
+    sendRegisterUser(name, password);
+    cout << "-> reg " << name.toStdString() << " "
+         << password.toStdString() << endl;
 }
 
-void MainWindow::login()
+void MainWindow::login(const QString &name, const QString &password)
 {
-
+    sendLogin(name, password);
+    cout << "-> login " << name.toStdString() << " "
+         << password.toStdString() << endl;
 }
 
 void MainWindow::logoff()
 {
-
+    sendLogoff();
+    cout << "-> logoff" << endl;
 }
 
 void MainWindow::createRoom(const QString &name)
