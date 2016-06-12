@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "dialogwindow.h"
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -197,6 +198,68 @@ bool MainWindow::connectToHost(const QString &hostName, int port)
 void MainWindow::respond(const QString &request)
 {
     cout << "<- " << request.toStdString() << endl;
+
+    stringstream in(request.toStdString());
+    string action;
+    in >> action;
+
+    if(!action.compare("ok"))
+    {
+        doOK();
+        return;
+    }
+
+    if(!action.compare("error"))
+    {
+        int id = -1;
+        in >> id;
+        doError(id);
+        return;
+    }
+
+    if(!action.compare("addroom"))
+    {
+        int id = -1;
+        in >> id;
+        doAddRoom(id);
+        return;
+    }
+
+    if(!action.compare("delroom"))
+    {
+        int id = -1;
+        in >> id;
+        doDelRoom(id);
+        return;
+    }
+
+    if(!action.compare("adduser"))
+    {
+        int id = -1;
+        string name;
+        in >> id >> name;
+        doAddUser(id, QString(name.c_str()));
+        return;
+    }
+
+    if(!action.compare("deluser"))
+    {
+        int id = -1;
+        string name;
+        in >> id >> name;
+        doDelUser(id, QString(name.c_str()));
+        return;
+    }
+
+    if(!action.compare("send"))
+    {
+        int id = -1;
+        in >> id;
+        doSend(id);
+        return;
+    }
+
+    cerr << "Error: action unrecognized: " << action << endl;
 }
 
 void MainWindow::sendData(const QByteArray &data)
@@ -261,6 +324,41 @@ void MainWindow::sendText(int id, const QString &text)
     string str = "send " + to_string(id) + "\n" +
             text.toStdString() + "\n\xFF\n";
     sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::doError(int code)
+{
+    cout << "error " << code << endl;
+}
+
+void MainWindow::doOK()
+{
+    cout << "OK" << endl;
+}
+
+void MainWindow::doAddRoom(int id)
+{
+    cout << "addroom " << id << endl;
+}
+
+void MainWindow::doAddUser(int id, const QString &name)
+{
+    cout << "adduser " << id << " " << name.toStdString() << endl;
+}
+
+void MainWindow::doDelUser(int id, const QString &name)
+{
+    cout << "deluser " << id << " " << name.toStdString() << endl;
+}
+
+void MainWindow::doDelRoom(int id)
+{
+    cout << "delroom " << id << endl;
+}
+
+void MainWindow::doSend(int id)
+{
+    cout << "send " << id << endl;
 }
 
 void MainWindow::updateButtons()

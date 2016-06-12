@@ -72,7 +72,13 @@ public:
     void sendText(int id, const QString &text);
 
     // Signals from server
-
+    void doError(int code);
+    void doOK();
+    void doAddRoom(int id);
+    void doAddUser(int id, const QString &name);
+    void doDelUser(int id, const QString &name);
+    void doDelRoom(int id);
+    void doSend(int id);
 
     void updateButtons(); // make them inactive
 
