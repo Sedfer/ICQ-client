@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
     vLayoutRight->addWidget(buttonCreate, 1);
 
     this->setLayout(hLayoutMain);
+    this->setGeometry(350, 150, 600, 400);
 
     updateButtons();
 
@@ -189,10 +190,68 @@ void MainWindow::dialogCanceled()
     dialog->deleteLater();
 }
 
-bool MainWindow::connectToHost(const QString &hostName, int port)
+void MainWindow::sendData(const QByteArray &data)
 {
-    socket->connectToHost(hostName, port);
-    return socket->isOpen();
+    if(socket != nullptr && socket->isWritable())
+    {
+        socket->write(data);
+    }
+    else
+    {
+        cerr << "Error: can not write data: " << data.toStdString() << endl;
+    }
+}
+
+void MainWindow::sendRegisterUser(const QString &name,
+                                  const QString &password)
+{
+    string str = "reg " + name.toStdString() + " " +
+            password.toStdString() + "\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendLogin(const QString &name, const QString &password)
+{
+    string str = "login " + name.toStdString() + " " +
+            password.toStdString() + "\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendLogoff()
+{
+    string str = "logoff\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendAddRoom()
+{
+    string str = "addroom\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendLeaveRoom(int id)
+{
+    string str = "leave " + to_string(id) + "\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendJoinRoom(int id)
+{
+    string str = "join " + to_string(id) + "\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendAddUser(int id, const QString &name)
+{
+    string str = "invite " + to_string(id) + " " + name.toStdString() + "\n";
+    sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::sendText(int id, const QString &text)
+{
+    string str = "send " + to_string(id) + "\n" +
+            text.toStdString() + "\n\xFF\n";
+    sendData(QByteArray(str.c_str()));
 }
 
 void MainWindow::respond(const QString &request)
@@ -262,70 +321,6 @@ void MainWindow::respond(const QString &request)
     cerr << "Error: action unrecognized: " << action << endl;
 }
 
-void MainWindow::sendData(const QByteArray &data)
-{
-    if(socket != nullptr && socket->isWritable())
-    {
-        socket->write(data);
-    }
-    else
-    {
-        cerr << "Error: can not write data: " << data.toStdString() << endl;
-    }
-}
-
-void MainWindow::sendRegisterUser(const QString &name,
-                                  const QString &password)
-{
-    string str = "reg " + name.toStdString() + " " +
-            password.toStdString() + "\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendLogin(const QString &name, const QString &password)
-{
-    string str = "login " + name.toStdString() + " " +
-            password.toStdString() + "\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendLogoff()
-{
-    string str = "logoff\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendAddRoom()
-{
-    string str = "addroom\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendLeaveRoom(int id)
-{
-    string str = "leave " + to_string(id) + "\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendJoinRoom(int id)
-{
-    string str = "join " + to_string(id) + "\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendAddUser(int id, const QString &name)
-{
-    string str = "invite " + to_string(id) + " " + name.toStdString() + "\n";
-    sendData(QByteArray(str.c_str()));
-}
-
-void MainWindow::sendText(int id, const QString &text)
-{
-    string str = "send " + to_string(id) + "\n" +
-            text.toStdString() + "\n\xFF\n";
-    sendData(QByteArray(str.c_str()));
-}
-
 void MainWindow::doError(int code)
 {
     cout << "error " << code << endl;
@@ -365,6 +360,12 @@ void MainWindow::updateButtons()
 {
 //    buttonAdd->setDisabled(true);
     //    buttonLeave->setEnabled(false);
+}
+
+bool MainWindow::connectToHost(const QString &hostName, int port)
+{
+    socket->connectToHost(hostName, port);
+    return socket->isOpen();
 }
 
 // TODO: complete

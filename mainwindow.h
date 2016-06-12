@@ -56,10 +56,6 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    bool connectToHost(const QString &hostName, int port);
-
-    void respond(const QString &request);
-
     void sendData(const QByteArray &data);
     // Signals to server
     void sendRegisterUser(const QString &name, const QString &password);
@@ -71,6 +67,7 @@ public:
     void sendAddUser(int id, const QString &name);
     void sendText(int id, const QString &text);
 
+    void respond(const QString &request);
     // Signals from server
     void doError(int code);
     void doOK();
@@ -81,7 +78,7 @@ public:
     void doSend(int id);
 
     void updateButtons(); // make them inactive
-
+    bool connectToHost(const QString &hostName, int port);
     int getCurrentRoomID();
 };
 
