@@ -1,5 +1,8 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <iostream>
+
+using namespace std;
 
 int main(int argc, char *argv[])
 {
@@ -8,10 +11,10 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    QTextEdit *tab1 = new QTextEdit();
-    QTextEdit *tab2 = new QTextEdit();
-    w.addTab(tab1, "Tab 1");
-    w.addTab(tab2, "Tab 2");
+    if(!w.connectToHost("127.0.0.1", 2424))
+    {
+        cerr << "Error: server is not avaliable" << endl;
+    }
 
     return a.exec();
 }
