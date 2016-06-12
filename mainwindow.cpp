@@ -46,13 +46,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->setLayout(hLayoutMain);
 
-    buttonSend->setDefault(true);
+    updateButtons();
 
     // Connections
-    connect(buttonSend, SIGNAL(clicked()), SLOT(dialogSendMessage()));
+    connect(buttonSend, SIGNAL(clicked()), SLOT(sendMessage()));
     connect(buttonAdd, SIGNAL(clicked()), SLOT(dialogAddUser()));
     connect(buttonJoin, SIGNAL(clicked()), SLOT(dialogJoinRoom()));
-    connect(buttonLeave, SIGNAL(clicked()), SLOT(dialogLeaveRoom()));
+    connect(buttonLeave, SIGNAL(clicked()), SLOT(leaveRoom()));
     connect(buttonCreate, SIGNAL(clicked()), SLOT(dialogCreateRoom()));
 }
 
@@ -63,58 +63,46 @@ MainWindow::~MainWindow()
 
 void MainWindow::readyRead()
 {
-    cerr << "Ready to read" << endl;
+    while(socket && socket->bytesAvailable() > 0)
+    {
+        QByteArray data = socket->readLine(1024);
+        respond(QString(data));
+    }
 }
 
 void MainWindow::disconnected()
 {
+    cerr << "Error: connection lost" << endl;
+}
+
+void MainWindow::dialogRegisterUser()
+{
 
 }
 
-void MainWindow::dialogSendMessage()
+void MainWindow::dialogLogin()
 {
-//    QString text = textEdit->toPlainText();
-//    if(!text.compare("")) // Empty message
-//        return;
 
-//    int index = tabWidget->currentIndex();
-//    if(index == -1){
-//        errorNoActiveTab();
-//        return;
-//    }
-
-//    QTime time = QTime::currentTime();
-//    QString color = "\"brown\"";
-//    QString name = "Someone";
-//    QString nameAndTime = "<font color=" + color + ">" + name +
-//            " [" + time.toString() + "] " + "</font>";
-
-//    listTabs->at(index)->append(nameAndTime);
-//    listTabs->at(index)->append(text + "\n");
-//    textEdit->clear();
 }
 
 void MainWindow::dialogAddUser()
 {
-    cout << "Add user" << endl;
+    DialogWindow *dialog = new DialogWindow(nullptr, "Enter name:");
+
+    connect(dialog, SIGNAL(buttonClickedOK(QString)), SLOT(addUser(QString)));
+    connect(dialog, SIGNAL(buttonClickedCancel()), SLOT(dialogCanceled()));
+
+    dialog->show();
 }
 
 void MainWindow::dialogJoinRoom()
 {
-    cout << "Remove user" << endl;
-}
+    DialogWindow *dialog = new DialogWindow(nullptr, "Enter room number:");
 
-void MainWindow::dialogLeaveRoom()
-{
-//    int index = tabWidget->currentIndex();
-//    if(index == -1){
-//        errorNoActiveTab();
-//        return;
-//    }
+    connect(dialog, SIGNAL(buttonClickedOK(QString)), SLOT(joinRoom(QString)));
+    connect(dialog, SIGNAL(buttonClickedCancel()), SLOT(dialogCanceled()));
 
-//    tabWidget->removeTab(index);
-//    delete listTabs->at(index);
-//    listTabs->removeAt(index);
+    dialog->show();
 }
 
 void MainWindow::dialogCreateRoom()
@@ -122,51 +110,93 @@ void MainWindow::dialogCreateRoom()
     DialogWindow *dialog = new DialogWindow(nullptr, "Enter name of the room:");
 
     connect(dialog, SIGNAL(buttonClickedOK(QString)), SLOT(createRoom(QString)));
+    connect(dialog, SIGNAL(buttonClickedCancel()), SLOT(dialogCanceled()));
 
     dialog->show();
 }
 
-void MainWindow::sendMessage()
+void MainWindow::registerUser()
 {
 
 }
 
-void MainWindow::addUser()
+void MainWindow::login()
 {
 
 }
 
-void MainWindow::joinRoom()
-{
-
-}
-
-void MainWindow::leaveRoom()
+void MainWindow::logoff()
 {
 
 }
 
 void MainWindow::createRoom(const QString &name)
 {
-    cerr << "Create room " << name.toStdString() << endl;
+    DialogWindow *dialog = static_cast<DialogWindow*>(sender());
+    dialog->hide();
+    dialog->deleteLater();
+
+    sendAddRoom();
+    cout << "-> addroom (" << name.toStdString() << ")" << endl;
 }
 
-void MainWindow::errorNoActiveTab()
+void MainWindow::leaveRoom()
 {
-    cerr << "Error: no active tab" << endl;
+    int id = getCurrentRoomID();
+
+    sendLeaveRoom(id);
+    cout << "-> leave " << id << endl;
 }
 
-//void MainWindow::addTab(QTextEdit *chatWindow, const QString &name)
-//{
-//    chatWindow->setReadOnly(true);
-//    listTabs->append(chatWindow);
-//    tabWidget->addTab(chatWindow, name);
-//}
+void MainWindow::joinRoom(const QString &id)
+{
+    DialogWindow *dialog = static_cast<DialogWindow*>(sender());
+    dialog->hide();
+    dialog->deleteLater();
+
+    sendJoinRoom(id.toInt());
+    cout << "-> join " << id.toInt() << endl;
+}
+
+void MainWindow::addUser(const QString &name)
+{
+    DialogWindow *dialog = static_cast<DialogWindow*>(sender());
+    dialog->hide();
+    dialog->deleteLater();
+
+    int id = getCurrentRoomID();
+
+    sendAddUser(id, name);
+    cout << "-> invite " << id << " " << name.toStdString() << endl;
+}
+
+void MainWindow::sendMessage()
+{
+    int id = getCurrentRoomID();
+    const QString &text = textEdit->toPlainText();
+
+    sendText(id, text);
+    cout << "-> send " << id << endl << text.toStdString() << endl;
+
+    textEdit->clear();
+}
+
+void MainWindow::dialogCanceled()
+{
+    DialogWindow *dialog = static_cast<DialogWindow*>(sender());
+    dialog->hide();
+    dialog->deleteLater();
+}
 
 bool MainWindow::connectToHost(const QString &hostName, int port)
 {
     socket->connectToHost(hostName, port);
     return socket->isOpen();
+}
+
+void MainWindow::respond(const QString &request)
+{
+    cout << "<- " << request.toStdString() << endl;
 }
 
 void MainWindow::sendData(const QByteArray &data)
@@ -231,4 +261,16 @@ void MainWindow::sendText(int id, const QString &text)
     string str = "send " + to_string(id) + "\n" +
             text.toStdString() + "\n\xFF\n";
     sendData(QByteArray(str.c_str()));
+}
+
+void MainWindow::updateButtons()
+{
+//    buttonAdd->setDisabled(true);
+    //    buttonLeave->setEnabled(false);
+}
+
+// TODO: complete
+int MainWindow::getCurrentRoomID()
+{
+    return 0;
 }

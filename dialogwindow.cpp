@@ -18,9 +18,10 @@ DialogWindow::DialogWindow(QWidget *parent, const QString &text)
     mainLayout->addLayout(buttonsLayout, 1);
 
     this->setLayout(mainLayout);
-    this->setGeometry(600, 800, 200, 50);
+    this->move(600, 300); // center of screen?
 
     connect(buttonOK, SIGNAL(clicked(bool)), SLOT(slotOK()));
+    connect(lineEdit, SIGNAL(returnPressed()), SLOT(slotOK()));
     connect(buttonCancel, SIGNAL(clicked(bool)), SLOT(slotCancel()));
 }
 

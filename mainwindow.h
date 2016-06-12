@@ -35,30 +35,32 @@ private slots:
     void readyRead();
     void disconnected();
 
-    void dialogSendMessage();
+    void dialogRegisterUser();
+    void dialogLogin();
     void dialogAddUser();
     void dialogJoinRoom();
-    void dialogLeaveRoom();
     void dialogCreateRoom();
 
-    void sendMessage();
-    void addUser();
-    void joinRoom();
-    void leaveRoom();
+    void registerUser();
+    void login();
+    void logoff();
     void createRoom(const QString &name);
+    void leaveRoom();
+    void joinRoom(const QString &id);
+    void addUser(const QString &name);
+    void sendMessage();
 
-private:
-    void errorNoActiveTab();
+    void dialogCanceled();
 
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    //void addTab(QTextEdit *chatWindow, const QString &name = "Tab");
     bool connectToHost(const QString &hostName, int port);
 
-    void sendData(const QByteArray &data);
+    void respond(const QString &request);
 
+    void sendData(const QByteArray &data);
     // Signals to server
     void sendRegisterUser(const QString &name, const QString &password);
     void sendLogin(const QString &name, const QString &password);
@@ -73,5 +75,7 @@ public:
 
 
     void updateButtons(); // make them inactive
+
+    int getCurrentRoomID();
 };
 
