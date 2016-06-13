@@ -384,7 +384,26 @@ void MainWindow::doDelRoom(int id)
 
 void MainWindow::doSend(int id)
 {
-    cout << "send " << id << endl;
+    QString text;
+    while(socket->bytesAvailable() > 0)
+    {
+        QByteArray line = socket->readLine(1024);
+        // '\xFF\n' means end of message
+        if(line.at(0) == '\xFF')
+        {
+            break;
+        }
+        text += QString(line);
+    }
+
+    Room *room = findRoom(id);
+    if(room == nullptr)
+    {
+        cerr << "Error: room not found: " << id << endl;
+        return;
+    }
+
+    room->append(text);
 }
 
 void MainWindow::updateButtons()
