@@ -390,6 +390,7 @@ void MainWindow::doAddUser(int id, const QString &name)
 
     room->userList.append(name);
     updateUserList();
+    showMessage(id, "<i>User " + name + " joined</i>\n");
 }
 
 void MainWindow::doDelUser(int id, const QString &name)
@@ -403,6 +404,7 @@ void MainWindow::doDelUser(int id, const QString &name)
 
     room->userList.removeOne(name);
     updateUserList();
+    showMessage(id, "<i>User " + name + " left</i>\n");
 }
 
 void MainWindow::doDelRoom(int id)
@@ -435,6 +437,11 @@ void MainWindow::doSend(int id)
         text += QString(line);
     }
 
+    showMessage(id, text);
+}
+
+void MainWindow::showMessage(int id, const QString &text)
+{
     Room *room = findRoom(id);
     if(room == nullptr)
     {

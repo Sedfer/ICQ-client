@@ -82,6 +82,7 @@ public:
     void doDelRoom(int id);
     void doSend(int id);
 
+    void showMessage(int id, const QString &text);
     void updateButtons(); // make them inactive
     bool connectToHost(const QString &hostName, int port);
     int getCurrentRoomID();

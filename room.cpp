@@ -3,7 +3,7 @@
 Room::Room(QWidget *parent, int _id, const QString &_name)
     : QTextEdit(parent), id(_id), name(_name), userList()
 {
-
+    this->setReadOnly(true);
 }
 
 Room::~Room()

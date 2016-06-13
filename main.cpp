@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         cerr << "Error: server is not avaliable" << endl;
     }
 
-    window.dialogLogin();
+//    window.dialogLogin();
 //    window.logoff();
 
 //    window.respond("error 7");
