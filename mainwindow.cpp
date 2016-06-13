@@ -33,12 +33,12 @@ MainWindow::MainWindow(QWidget *parent)
     vLayoutLeft->addLayout(hLayoutBottom, 1);
 
     // Right layout (list, buttons)
-    listUsers = new QListWidget();
+    userList = new QListWidget();
     buttonAdd = new QPushButton("Add user...");
     buttonLeave = new QPushButton("Leave room");
     buttonJoin = new QPushButton("Join room...");
     buttonCreate = new QPushButton("Create room...");
-    vLayoutRight->addWidget(listUsers, 5);
+    vLayoutRight->addWidget(userList, 5);
     vLayoutRight->addWidget(buttonAdd, 1);
     vLayoutRight->addWidget(buttonLeave, 1);
     vLayoutRight->addStretch(1);
@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(buttonJoin, SIGNAL(clicked()), SLOT(dialogJoinRoom()));
     connect(buttonLeave, SIGNAL(clicked()), SLOT(leaveRoom()));
     connect(buttonCreate, SIGNAL(clicked()), SLOT(dialogCreateRoom()));
+
+    connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(updateUserList()));
 }
 
 MainWindow::~MainWindow()
@@ -338,22 +340,53 @@ void MainWindow::doOK()
 
 void MainWindow::doAddRoom(int id)
 {
-    cout << "addroom " << id << endl;
+    string name = "room" + to_string(id);
+    Room *room = new Room(nullptr, id, QString(name.c_str()));
+
+    roomList->append(room);
+    tabWidget->addTab(room, room->name);
+    updateUserList();
 }
 
 void MainWindow::doAddUser(int id, const QString &name)
 {
-    cout << "adduser " << id << " " << name.toStdString() << endl;
+    Room *room = findRoom(id);
+    if(room == nullptr)
+    {
+        cerr << "Error: room not found: " << id << endl;
+        return;
+    }
+
+    room->userList.append(name);
+    updateUserList();
 }
 
 void MainWindow::doDelUser(int id, const QString &name)
 {
-    cout << "deluser " << id << " " << name.toStdString() << endl;
+    Room *room = findRoom(id);
+    if(room == nullptr)
+    {
+        cerr << "Error: room not found: " << id << endl;
+        return;
+    }
+
+    room->userList.removeOne(name);
+    updateUserList();
 }
 
 void MainWindow::doDelRoom(int id)
 {
-    cout << "delroom " << id << endl;
+    Room *room = findRoom(id);
+    if(room == nullptr)
+    {
+        cerr << "Error: room not found: " << id << endl;
+        return;
+    }
+
+    int index = roomList->indexOf(room);
+    tabWidget->removeTab(index);
+    roomList->removeAt(index);
+    updateUserList();
 }
 
 void MainWindow::doSend(int id)
@@ -364,7 +397,15 @@ void MainWindow::doSend(int id)
 void MainWindow::updateButtons()
 {
 //    buttonAdd->setDisabled(true);
-    //    buttonLeave->setEnabled(false);
+//    buttonLeave->setEnabled(false);
+}
+
+void MainWindow::updateUserList()
+{
+    int index = tabWidget->currentIndex();
+
+    userList->clear();
+    userList->addItems(roomList->at(index)->userList);
 }
 
 bool MainWindow::connectToHost(const QString &hostName, int port)
@@ -373,8 +414,25 @@ bool MainWindow::connectToHost(const QString &hostName, int port)
     return socket->isOpen();
 }
 
-// TODO: complete
 int MainWindow::getCurrentRoomID()
 {
-    return 0;
+    int index = tabWidget->currentIndex();
+    return roomList->at(index)->id;
+}
+
+Room *MainWindow::findRoom(int id)
+{
+    auto room = find_if(roomList->begin(), roomList->end(),
+                        [id](Room *room){
+        return room->id == id;
+    });
+
+    if(room != roomList->end())
+    {
+        return *room;
+    }
+    else
+    {
+        return nullptr;
+    }
 }

@@ -25,7 +25,7 @@ private:
 
     // Right layout (list, buttons)
     QVBoxLayout *vLayoutRight;
-    QListWidget *listUsers;
+    QListWidget *userList;
     QPushButton *buttonAdd;
     QPushButton *buttonJoin;
     QPushButton *buttonLeave;
@@ -51,6 +51,8 @@ public slots:
     void sendMessage();
 
     void dialogCanceled();
+
+    void updateUserList();
 
 public:
     MainWindow(QWidget *parent = 0);
@@ -80,5 +82,6 @@ public:
     void updateButtons(); // make them inactive
     bool connectToHost(const QString &hostName, int port);
     int getCurrentRoomID();
+    Room* findRoom(int id);
 };
 
