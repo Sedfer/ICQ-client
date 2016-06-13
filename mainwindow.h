@@ -39,12 +39,11 @@ public slots:
     void dialogLogin();
     void dialogAddUser();
     void dialogJoinRoom();
-    void dialogCreateRoom();
 
     void registerUser(const QString &name, const QString &password);
     void login(const QString &name, const QString &password);
     void logoff();
-    void createRoom(const QString &name);
+    void createRoom();
     void leaveRoom();
     void joinRoom(const QString &id);
     void addUser(const QString &name);

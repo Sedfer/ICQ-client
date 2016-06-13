@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     buttonAdd = new QPushButton("Add user...");
     buttonLeave = new QPushButton("Leave room");
     buttonJoin = new QPushButton("Join room...");
-    buttonCreate = new QPushButton("Create room...");
+    buttonCreate = new QPushButton("Create room");
     vLayoutRight->addWidget(userList, 5);
     vLayoutRight->addWidget(buttonAdd, 1);
     vLayoutRight->addWidget(buttonLeave, 1);
@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(buttonAdd, SIGNAL(clicked()), SLOT(dialogAddUser()));
     connect(buttonJoin, SIGNAL(clicked()), SLOT(dialogJoinRoom()));
     connect(buttonLeave, SIGNAL(clicked()), SLOT(leaveRoom()));
-    connect(buttonCreate, SIGNAL(clicked()), SLOT(dialogCreateRoom()));
+    connect(buttonCreate, SIGNAL(clicked()), SLOT(createRoom()));
 
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(updateUserList()));
 }
@@ -76,7 +76,7 @@ void MainWindow::readyRead()
 
 void MainWindow::disconnected()
 {
-    cerr << "Error: connection lost" << endl;
+    doError(100);
 }
 
 void MainWindow::dialogRegisterUser()
@@ -109,16 +109,6 @@ void MainWindow::dialogJoinRoom()
     dialog->show();
 }
 
-void MainWindow::dialogCreateRoom()
-{
-    DialogWindow *dialog = new DialogWindow(nullptr, "Enter name of the room:");
-
-    connect(dialog, SIGNAL(buttonClickedOK(QString)), SLOT(createRoom(QString)));
-    connect(dialog, SIGNAL(buttonClickedCancel()), SLOT(dialogCanceled()));
-
-    dialog->show();
-}
-
 void MainWindow::registerUser(const QString &name, const QString &password)
 {
     sendRegisterUser(name, password);
@@ -139,14 +129,10 @@ void MainWindow::logoff()
     cout << "-> logoff" << endl;
 }
 
-void MainWindow::createRoom(const QString &name)
+void MainWindow::createRoom()
 {
-    DialogWindow *dialog = static_cast<DialogWindow*>(sender());
-    dialog->hide();
-    dialog->deleteLater();
-
     sendAddRoom();
-    cout << "-> addroom (" << name.toStdString() << ")" << endl;
+    cout << "-> addroom" << endl;
 }
 
 void MainWindow::leaveRoom()
@@ -330,7 +316,12 @@ void MainWindow::respond(const QString &request)
 
 void MainWindow::doError(int code)
 {
-    cout << "error " << code << endl;
+    string text = "Error (code " + to_string(code) + ")";
+    QMessageBox *mbox = new QMessageBox(QMessageBox::Critical,
+                                        "Error",
+                                        QString(text.c_str()),
+                                        QMessageBox::Ok);
+    mbox->exec();
 }
 
 void MainWindow::doOK()
@@ -346,6 +337,7 @@ void MainWindow::doAddRoom(int id)
     roomList->append(room);
     tabWidget->addTab(room, room->name);
     updateUserList();
+    updateButtons();
 }
 
 void MainWindow::doAddUser(int id, const QString &name)
@@ -387,6 +379,7 @@ void MainWindow::doDelRoom(int id)
     tabWidget->removeTab(index);
     roomList->removeAt(index);
     updateUserList();
+    updateButtons();
 }
 
 void MainWindow::doSend(int id)
@@ -396,8 +389,16 @@ void MainWindow::doSend(int id)
 
 void MainWindow::updateButtons()
 {
-//    buttonAdd->setDisabled(true);
-//    buttonLeave->setEnabled(false);
+    if(getCurrentRoomID() != -1)
+    {
+        buttonAdd->setEnabled(true);
+        buttonLeave->setEnabled(true);
+    }
+    else
+    {
+        buttonAdd->setEnabled(false);
+        buttonLeave->setEnabled(false);
+    }
 }
 
 void MainWindow::updateUserList()
@@ -405,7 +406,9 @@ void MainWindow::updateUserList()
     int index = tabWidget->currentIndex();
 
     userList->clear();
-    userList->addItems(roomList->at(index)->userList);
+
+    if(index != -1)
+        userList->addItems(roomList->at(index)->userList);
 }
 
 bool MainWindow::connectToHost(const QString &hostName, int port)
@@ -417,7 +420,10 @@ bool MainWindow::connectToHost(const QString &hostName, int port)
 int MainWindow::getCurrentRoomID()
 {
     int index = tabWidget->currentIndex();
-    return roomList->at(index)->id;
+    if(index != -1)
+        return roomList->at(index)->id;
+    else
+        return -1;
 }
 
 Room *MainWindow::findRoom(int id)
