@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "dialogwindow.h"
+#include "logindialog.h"
 #include <iostream>
 #include <sstream>
 
@@ -86,7 +87,16 @@ void MainWindow::dialogRegisterUser()
 
 void MainWindow::dialogLogin()
 {
+    LoginDialog *dialog = new LoginDialog(nullptr);
 
+    connect(dialog, SIGNAL(buttonClickedLogin(QString, QString)),
+            SLOT(login(QString, QString)));
+    connect(dialog, SIGNAL(buttonClickedRegister(QString, QString)),
+            SLOT(registerUser(QString, QString)));
+    connect(dialog, SIGNAL(buttonClickedCancel()),
+            SLOT(loginDialogCanceled()));
+
+    dialog->show();
 }
 
 void MainWindow::dialogAddUser()
@@ -111,6 +121,10 @@ void MainWindow::dialogJoinRoom()
 
 void MainWindow::registerUser(const QString &name, const QString &password)
 {
+    LoginDialog *dialog = static_cast<LoginDialog*>(sender());
+//    dialog->hide();
+//    dialog->deleteLater();
+
     sendRegisterUser(name, password);
     cout << "-> reg " << name.toStdString() << " "
          << password.toStdString() << endl;
@@ -118,6 +132,10 @@ void MainWindow::registerUser(const QString &name, const QString &password)
 
 void MainWindow::login(const QString &name, const QString &password)
 {
+    LoginDialog *dialog = static_cast<LoginDialog*>(sender());
+    dialog->hide();
+    dialog->deleteLater();
+
     sendLogin(name, password);
     cout << "-> login " << name.toStdString() << " "
          << password.toStdString() << endl;
@@ -179,6 +197,13 @@ void MainWindow::sendMessage()
 void MainWindow::dialogCanceled()
 {
     DialogWindow *dialog = static_cast<DialogWindow*>(sender());
+    dialog->hide();
+    dialog->deleteLater();
+}
+
+void MainWindow::loginDialogCanceled()
+{
+    LoginDialog *dialog = static_cast<LoginDialog*>(sender());
     dialog->hide();
     dialog->deleteLater();
 }

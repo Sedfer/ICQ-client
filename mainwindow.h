@@ -50,6 +50,7 @@ public slots:
     void sendMessage();
 
     void dialogCanceled();
+    void loginDialogCanceled();
 
     void updateUserList();
 

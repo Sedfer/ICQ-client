@@ -15,8 +15,10 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     room.cpp \
-    dialogwindow.cpp
+    dialogwindow.cpp \
+    logindialog.cpp
 
 HEADERS  += mainwindow.h \
     room.h \
-    dialogwindow.h
+    dialogwindow.h \
+    logindialog.h
