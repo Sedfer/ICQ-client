@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
 
     hLayoutMain = new QHBoxLayout();
+    initMenu();
+    hLayoutMain->setMenuBar(menuBar);
 
     vLayoutLeft = new QVBoxLayout();
     vLayoutRight = new QVBoxLayout();
@@ -61,6 +63,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(updateUserList()));
 }
 
+void MainWindow::initMenu()
+{
+    menuBar = new QMenuBar();
+
+    QMenu *menu = new QMenu("User");
+    menu->addAction("Log in...", this, SLOT(dialogLogin()));
+    menu->addAction("Log off", this, SLOT(logoff()));
+    menu->addSeparator();
+    menu->addAction("Exit", this, SLOT(close()));
+
+    menuBar->addMenu(menu);
+}
+
 MainWindow::~MainWindow()
 {
 
@@ -78,11 +93,6 @@ void MainWindow::readyRead()
 void MainWindow::disconnected()
 {
     doError(100);
-}
-
-void MainWindow::dialogRegisterUser()
-{
-
 }
 
 void MainWindow::dialogLogin()
@@ -121,9 +131,7 @@ void MainWindow::dialogJoinRoom()
 
 void MainWindow::registerUser(const QString &name, const QString &password)
 {
-    LoginDialog *dialog = static_cast<LoginDialog*>(sender());
-//    dialog->hide();
-//    dialog->deleteLater();
+    // Do NOT hide/delete LoginDialog object
 
     sendRegisterUser(name, password);
     cout << "-> reg " << name.toStdString() << " "
@@ -341,10 +349,16 @@ void MainWindow::respond(const QString &request)
 
 void MainWindow::doError(int code)
 {
-    string text = "Error (code " + to_string(code) + ")";
+    QString err = getErrorMessage(code);
+    if(!err.compare("")) //if empty
+    {
+        cerr << "Error from server (code " << code << ")" << endl;
+        return;
+    }
+
     QMessageBox *mbox = new QMessageBox(QMessageBox::Critical,
                                         "Error",
-                                        QString(text.c_str()),
+                                        err,
                                         QMessageBox::Ok);
     mbox->exec();
 }
@@ -437,11 +451,13 @@ void MainWindow::updateButtons()
     {
         buttonAdd->setEnabled(true);
         buttonLeave->setEnabled(true);
+        buttonSend->setEnabled(true);
     }
     else
     {
         buttonAdd->setEnabled(false);
         buttonLeave->setEnabled(false);
+        buttonSend->setEnabled(false);
     }
 }
 
@@ -485,4 +501,36 @@ Room *MainWindow::findRoom(int id)
     {
         return nullptr;
     }
+}
+
+QString MainWindow::getErrorMessage(int code)
+{
+    switch(code)
+    {
+    case 4:
+        return "User not found";
+    case 5:
+        return "Wrong password";
+    case 6:
+        return "User already logged in";
+    case 7:
+        return "You have to log off first";
+    case 8:
+        return "Invalid login or password";
+    case 9:
+        return "Username taken";
+    case 10:
+        return "Room not found";
+    case 11:
+        return "User not found";
+    case 12:
+        return "User offline";
+    case 13:
+        return "User already in that room";
+    case 100:
+        return "Connection lost";
+    default:
+        return "";
+    }
+
 }

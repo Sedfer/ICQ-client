@@ -14,6 +14,8 @@ private:
     // Main layout
     QHBoxLayout *hLayoutMain;
 
+    QMenuBar *menuBar;
+
     // Left layout (tabWindows, bottom layout)
     QVBoxLayout *vLayoutLeft;
     QTabWidget *tabWidget;
@@ -35,7 +37,6 @@ public slots:
     void readyRead();
     void disconnected();
 
-    void dialogRegisterUser();
     void dialogLogin();
     void dialogAddUser();
     void dialogJoinRoom();
@@ -57,6 +58,8 @@ public slots:
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    void initMenu();
 
     void sendData(const QByteArray &data);
     // Signals to server
@@ -83,5 +86,5 @@ public:
     bool connectToHost(const QString &hostName, int port);
     int getCurrentRoomID();
     Room* findRoom(int id);
+    QString getErrorMessage(int code);
 };
-
